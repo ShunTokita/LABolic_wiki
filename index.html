@@ -6,6 +6,9 @@
 <title>LABolic 攻略ノート</title>
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="攻略ノート">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="ブラウザゲーム「Welcome to LABolic!」の攻略情報、データベース、UDMのおすすめビルドをまとめた攻略ノート。">
 <meta property="og:type" content="website">
@@ -98,6 +101,10 @@ p { margin: 0; }
 .toc a { color: var(--ink); text-decoration: none; }
 .toc a:hover { color: var(--link); text-decoration: underline; }
 .toc .n { font-family: var(--font-mono); color: var(--ink-2); font-size: .8em; margin-right: .4em; }
+/* The item being read (set by the script as the page scrolls). */
+.toc a.current { font-weight: 700; color: var(--ink); background: var(--warn-bg); box-shadow: inset 3px 0 0 var(--coin);
+  padding: .05em .4em .05em calc(.4em + 3px); margin-left: calc(-.4em - 3px); }
+.toc a.current .n { color: var(--coin); }
 
 main { min-width: 0; display: grid; gap: 56px; }
 .part { display: grid; gap: 28px; }
@@ -106,7 +113,7 @@ main { min-width: 0; display: grid; gap: 56px; }
 .part.udm > header .eyebrow { color: var(--lv4); }
 section { display: grid; gap: 14px; scroll-margin-top: 16px; }
 section > h3 { display: flex; gap: .5em; align-items: baseline; }
-section > h3 .n { font-family: var(--font-mono); font-size: .62em; color: var(--ink-2); }
+section > h3 .n { font-family: var(--font-mono); font-size: .62em; color: var(--ink-2); white-space: nowrap; }
 .prose { max-width: 40em; display: grid; gap: .8em; }
 .prose ul, .prose ol { margin: 0; padding-left: 1.3em; display: grid; gap: .4em; }
 .k { font-family: var(--font-mono); font-size: .92em; padding: 0 .3em; border: 1px solid var(--rule); background: var(--sheet); white-space: nowrap; }
@@ -133,6 +140,8 @@ figure.m img { width: 380px; }
 figure.t img { width: 220px; }
 figure.t figcaption { max-width: 220px; }
 figure.l img { width: 100%; }
+figure.icon img { width: 90px; border-radius: 20px; }
+figure.icon figcaption { max-width: 220px; }
 figure.l { width: 100%; }
 figcaption { font-size: .85rem; color: var(--ink-2); max-width: 380px; }
 
@@ -176,6 +185,50 @@ td.mono { font-family: var(--font-mono); font-size: .85rem; }
 .btn { justify-self: start; font: inherit; font-family: var(--font-display); padding: .35em 1em; cursor: pointer;
   color: var(--paper); background: var(--lv4); border: 2px solid var(--lv4); border-radius: 2px; }
 
+/* ---- floating controls (the script below runs them) ---- */
+/* 次の項目へ: one button, bottom right, always pointing past the item being read. */
+.next { position: fixed; z-index: 30;
+  right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  display: inline-flex; gap: .55em; align-items: baseline; max-width: min(calc(100vw - 88px), 360px);
+  padding: .45em .9em; border: 1.5px solid var(--ink); background: var(--sheet); color: var(--ink);
+  text-decoration: none; box-shadow: 3px 3px 0 var(--rule); }
+.next[hidden] { display: none; }
+.next:hover { background: var(--ink); color: var(--paper); }
+.next:focus-visible, .toc-tab:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+.next .lead { font-family: var(--font-display); white-space: nowrap; }
+.next .where { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.next .n { font-family: var(--font-mono); font-size: .85em; opacity: .75; margin-right: .3em; }
+/* Phones: a small ">" on the left edge opens the contents as a drawer. */
+.toc-tab, .toc-scrim { display: none; }
+@media (max-width: 959px) {
+  .toc-tab { display: grid; place-items: center; position: fixed; z-index: 40;
+    /* High on the screen: at mid-height it sat on the hero's play button on short phones. */
+    left: env(safe-area-inset-left, 0px); top: calc(22% + env(safe-area-inset-top, 0px));
+    width: 20px; height: 52px; padding: 0; cursor: pointer;
+    font-family: var(--font-mono); font-size: 1.05rem; line-height: 1;
+    color: var(--paper); background: var(--ink); border: 0; border-radius: 0 6px 6px 0; opacity: .85; }
+  body.toc-open .toc-tab { display: none; }
+  .toc-scrim { position: fixed; inset: 0; z-index: 45; background: rgba(15, 20, 30, .45); }
+  body.toc-open .toc-scrim { display: block; animation: toc-fade .25s ease-out; }
+  body.toc-open .toc { position: fixed; z-index: 50; top: 0; bottom: 0; left: 0;
+    width: min(82vw, 320px); overflow-y: auto; background: var(--paper);
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(12px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+    box-shadow: 4px 0 0 var(--rule);
+    animation: toc-in .5s cubic-bezier(.22, .9, .3, 1); }
+  body.toc-open { overflow: hidden; }
+}
+/* Slides in, runs a little past its edge, and settles back: a soft "boing". */
+@keyframes toc-in {
+  0%   { transform: translateX(-100%); }
+  60%  { transform: translateX(14px) scaleX(1.02); }
+  80%  { transform: translateX(-4px); }
+  100% { transform: none; }
+}
+@keyframes toc-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  body.toc-open .toc, body.toc-open .toc-scrim { animation: none; }
+}
+
 /* ---- builds ---- */
 .builds { display: grid; gap: 18px; }
 .build { border: 1.5px solid var(--lv4); background: var(--sheet); padding: 14px 16px; display: grid; gap: 10px; }
@@ -209,11 +262,13 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
         <li><a href="#about"><span class="n">0</span>LABolicとは？</a></li>
         <li><a href="#tips"><span class="n">1</span>攻略情報</a>
           <ol>
-            <li><a href="#coworker-tips"><span class="n">1-1</span>Co-Worker運用</a></li>
-            <li><a href="#coins"><span class="n">1-2</span>コインの稼ぎ方</a></li>
-            <li><a href="#crew"><span class="n">1-3</span>おすすめCo-Worker</a></li>
-            <li><a href="#training"><span class="n">1-4</span>講習のコツ</a></li>
-            <li><a href="#search"><span class="n">1-5</span>条件探索</a></li>
+            <li><a href="#save"><span class="n">1-1</span>セーブについて</a></li>
+            <li><a href="#homescreen"><span class="n">1-2</span>ホーム画面に追加</a></li>
+            <li><a href="#coworker-tips"><span class="n">1-3</span>Co-Worker運用</a></li>
+            <li><a href="#crew"><span class="n">1-4</span>おすすめCo-Worker</a></li>
+            <li><a href="#coins"><span class="n">1-5</span>コインの稼ぎ方</a></li>
+            <li><a href="#training"><span class="n">1-6</span>講習のコツ</a></li>
+            <li><a href="#search"><span class="n">1-7</span>条件探索</a></li>
           </ol></li>
         <li><a href="#db"><span class="n">2</span>データベース</a>
           <ol>
@@ -248,8 +303,63 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
     <article class="part" id="tips">
       <header><span class="eyebrow">CHAPTER 1</span><h2>攻略情報</h2></header>
 
+      <section id="save">
+        <h3><span class="n">1-1</span>セーブについて</h3>
+        <div class="prose">
+          <p>進行状況は自動でセーブされます。セーブデータの保存先はサーバーではなく、<b>遊んでいるブラウザの中</b>です。</p>
+          <ul>
+            <li>同じ端末でも、ブラウザが違えば（SafariとChromeなど）別のセーブになります。シークレットモード（プライベートブラウズ）では、閉じるとセーブが消えます。</li>
+            <li>ブラウザの履歴やサイトデータ（Cookieなど）を消去すると、セーブも消えます。</li>
+          </ul>
+          <p><b>バックアップと復元</b>　設定（右上の⚙）の「セーブキー」を使います。</p>
+          <ul>
+            <li><b>バックアップ</b>：「セーブキーをコピー」を押すと、セーブ内容が1行の長い文字列（セーブキー）としてコピーされます。メモアプリなどに貼り付けて保管しておきましょう。</li>
+            <li><b>復元</b>：「セーブキーを入力」を押して、保管しておいたセーブキーを貼り付けます。<b>今の進行状況はセーブキーの内容で上書きされます</b>。</li>
+            <li><b>別のブラウザ・端末への引っ越し</b>：元のブラウザでセーブキーをコピーし、移行先のブラウザで入力すれば、続きから遊べます。</li>
+          </ul>
+        </div>
+        <p class="note"><b>注意</b>iPhone・iPadのSafariでは、しばらくゲームを開かないでいると、サイトのデータが自動で消されることがあります（Safariを使った日数で7日が目安）。ときどきセーブキーをコピーしておくと安心です。</p>
+        <p class="note"><b>注意</b>セーブキーには、講習の記録、UDMのスキルストア、進行中のUDMも含まれます。含まれないのは<b>設定</b>（効果音や表示など）だけです。ただし、<b>v66以前にコピーしたセーブキーには講習の記録などが入っていない</b>ので、引っ越しの前にコピーし直してください。</p>
+      </section>
+
+      <section id="homescreen">
+        <h3><span class="n">1-2</span>スマートフォンのホーム画面に追加</h3>
+        <div class="prose">
+          <p>ホーム画面に追加すると、アプリのように遊べます。</p>
+          <ul>
+            <li>ホーム画面に<b>LABolicのアイコン</b>が並び、タップするだけで開けます。</li>
+            <li>アドレスバーなどのブラウザの表示が消え、<b>画面を広く使えます</b>。</li>
+            <li>新しいバージョンが出ても、アイコンから開けば<b>常に最新版</b>が起動します。</li>
+          </ul>
+          <p><b>iPhone・iPad（Safari）</b></p>
+          <ol>
+            <li>Safariでゲームを開く</li>
+            <li>共有ボタン（四角から上向きの矢印が出ているアイコン）を押す。見当たらないときは「…」から「共有」を選ぶ</li>
+            <li>「ホーム画面に追加」を選ぶ。「Webアプリとして開く」が表示されたらオンのままにする</li>
+            <li>名前が「LABolic」になっていることを確認して「追加」</li>
+          </ol>
+          <p><b>Android（Chrome）</b></p>
+          <ol>
+            <li>Chromeでゲームを開く</li>
+            <li>右上の「⋮」メニューから「ホーム画面に追加」を選ぶ</li>
+            <li>「インストール」を選ぶ</li>
+          </ol>
+        </div>
+        <p class="note"><b>注意</b>iPhone・iPadでは、ホーム画面から開いたゲームは<b>Safariとは別にセーブされます</b>。Safariで遊んできた続きをホーム画面版で遊ぶには、先にSafariで「セーブキーをコピー」し、ホーム画面版で「セーブキーを入力」してください（<a href="#save">セーブについて</a>）。Androidでは、Chromeとホーム画面版で同じセーブが使われます。</p>
+        <div class="prose">
+          <ul>
+            <li>アドレスバーがないので、最新の状態に読み込み直したいときは、アプリを一度終了してから開き直してください。</li>
+            <li>この攻略ノートも同じ手順でホーム画面に追加できます（「攻略ノート」という名前で登録され、開くとブラウザで表示されます）。</li>
+          </ul>
+        </div>
+        <div class="figs">
+          <figure class="icon"><img class="px" src="img/game-icon.png" alt="LABolicのアイコン。クリーム色の地に、SEMとBenのドット絵" width="180" height="180" loading="lazy">
+            <figcaption>ホーム画面に追加されるアイコン</figcaption></figure>
+        </div>
+      </section>
+
       <section id="coworker-tips">
-        <h3><span class="n">1-1</span>Co-Worker運用のTips</h3>
+        <h3><span class="n">1-3</span>Co-Worker運用のTips</h3>
         <div class="prose">
           <p>Co-Workerは<b>プレイヤーが作った試験片には触りません</b>。加工・分析するのは、Co-Worker自身が合成した試験片だけです。</p>
           <ul>
@@ -263,26 +373,8 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
         </div>
       </section>
 
-      <section id="coins">
-        <h3><span class="n">1-2</span>コインの稼ぎ方</h3>
-        <div class="prose">
-          <ol>
-            <li>装置の<b>講習</b>をクリアして、一括処理を解放する</li>
-            <li>発見済みのDiscovery（DIS）を<b>反復受注</b>し、一括処理でまとめて実行する</li>
-            <li>分析が終わった結果の提出は、<span class="k">W</span>だけをオンにしたCo-Workerに任せる</li>
-          </ol>
-        </div>
-        <p class="note"><b>注意</b>Lab Lv4の導入直後は装置の故障が頻発して、資金が尽きて詰みやすくなります。修理費は装置Lv×50c（Lv4の装置で200c）です。コインを貯めておくことをお勧めします。</p>
-        <div class="figs">
-          <figure class="s"><img src="img/shots/train-batch.webp" alt="合成装置の数量選択。+10ボタンで数量を増やしている" width="390" height="120" loading="lazy">
-            <figcaption>講習後は、数量を指定して一括で実験できる</figcaption></figure>
-          <figure class="s"><img src="img/shots/idea-repeat.webp" alt="受注中の依頼カード。反復のスイッチがオンになっている" width="374" height="112" loading="lazy">
-            <figcaption>「🔁 反復」をオンにすると、提出後に同じ依頼を自動で再受注する</figcaption></figure>
-        </div>
-      </section>
-
       <section id="crew">
-        <h3><span class="n">1-3</span>LABレベル別おすすめCo-Worker</h3>
+        <h3><span class="n">1-4</span>LABレベル別おすすめCo-Worker</h3>
         <div class="levels">
           <div class="lvl">
             <h4>Lab Lv2・3</h4>
@@ -320,8 +412,26 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
         </div>
       </section>
 
+      <section id="coins">
+        <h3><span class="n">1-5</span>コインの稼ぎ方</h3>
+        <div class="prose">
+          <ol>
+            <li>装置の<b>講習</b>をクリアして、一括処理を解放する</li>
+            <li>発見済みのDiscovery（DIS）を<b>反復受注</b>し、一括処理でまとめて実行する</li>
+            <li>分析が終わった結果の提出は、<span class="k">W</span>だけをオンにしたCo-Workerに任せる</li>
+          </ol>
+        </div>
+        <p class="note"><b>注意</b>Lab Lv4の導入直後は装置の故障が頻発して、資金が尽きて詰みやすくなります。修理費は装置Lv×50c（Lv4の装置で200c）です。コインを貯めておくことをお勧めします。</p>
+        <div class="figs">
+          <figure class="s"><img src="img/shots/train-batch.webp" alt="合成装置の数量選択。+10ボタンで数量を増やしている" width="390" height="120" loading="lazy">
+            <figcaption>講習後は、数量を指定して一括で実験できる</figcaption></figure>
+          <figure class="s"><img src="img/shots/idea-repeat.webp" alt="受注中の依頼カード。反復のスイッチがオンになっている" width="374" height="112" loading="lazy">
+            <figcaption>「🔁 反復」をオンにすると、提出後に同じ依頼を自動で再受注する</figcaption></figure>
+        </div>
+      </section>
+
       <section id="training">
-        <h3><span class="n">1-4</span>講習のコツ</h3>
+        <h3><span class="n">1-6</span>講習のコツ</h3>
         <div class="prose">
           <p>一括処理の重要度は <b>分析 ≫ 合成 ＞ 加工</b>。講習のハイスコアが高いほど、一括処理で装置が壊れにくくなります（<a href="#failrate">講習スコアと故障率</a>）。</p>
           <ul>
@@ -339,7 +449,7 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
       </section>
 
       <section id="search">
-        <h3><span class="n">1-5</span>条件探索のやり方</h3>
+        <h3><span class="n">1-7</span>条件探索のやり方</h3>
         <div class="prose">
           <ul>
             <li>装置のポップアップにある「<b>自分のみ</b>」スイッチで、自分が作った試験片だけを表示できます。Co-Workerの試験片に紛れず、自分の作業に集中できます。</li>
@@ -764,6 +874,10 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
   <p><a href="https://shuntokita.github.io/welcome-to-LABolic/">ゲームをプレイする</a></p>
 </footer>
 
+<button class="toc-tab" type="button" id="toc-tab" aria-label="目次を開く" aria-controls="toc">&gt;</button>
+<div class="toc-scrim" id="toc-scrim"></div>
+<a class="next" id="next" href="#about" hidden><span class="lead">次の項目へ ↓</span><span class="where"><span class="n"></span><span class="t"></span></span></a>
+
 <script>
 (() => {
   const btn = document.getElementById('spoil-btn'), body = document.getElementById('spoil-body');
@@ -776,6 +890,74 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
   const toc = document.getElementById('toc');
   if (window.matchMedia('(max-width: 959px)').matches) toc.open = false;
   toc.addEventListener('click', e => { if (e.target.closest('a') && window.matchMedia('(max-width: 959px)').matches) toc.open = false; });
+
+  // Phones: the contents as a drawer from the left, opened by the ">" tab.
+  const narrow = window.matchMedia('(max-width: 959px)');
+  const drawer = open => {
+    document.body.classList.toggle('toc-open', open);
+    if (open) toc.open = true;
+  };
+  document.getElementById('toc-tab').addEventListener('click', () => { drawer(true); requestAnimationFrame(() => keepLitInView()); });
+  document.getElementById('toc-scrim').addEventListener('click', () => drawer(false));
+  toc.addEventListener('click', e => { if (e.target.closest('a') && narrow.matches) drawer(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') drawer(false); });
+  narrow.addEventListener('change', () => drawer(false));
+
+  // 次の項目へ: one floating button that always points at the item after the
+  // one being read (the last whose top has passed a third of the way down),
+  // so a reader can skip what does not interest them. Items are the opening
+  // chapter and every section, in page order.
+  const items = [...document.querySelectorAll('main > article#about, main section[id]')];
+  const next = document.getElementById('next');
+  const label = el => {
+    const h = el.querySelector('h3, h2'), n = h.querySelector('.n')?.textContent || '';
+    return [n, h.textContent.replace(n, '').trim()];
+  };
+  let shown = null, lit = null, ticking = false;
+  const tocLink = id => toc.querySelector(`a[href="#${id}"]`);
+  // The contents scroll on their own when taller than the window (the sticky
+  // column, the phone's drawer): keep the lit item inside them, never moving
+  // the page itself.
+  const nav = toc.closest('nav');
+  const keepLitInView = () => {
+    const a = lit && tocLink(lit.id);
+    if (!a || nav.scrollHeight <= nav.clientHeight) return;
+    const n = nav.getBoundingClientRect(), r = a.getBoundingClientRect();
+    if (r.top < n.top + 8) nav.scrollTop -= n.top + 8 - r.top;
+    else if (r.bottom > n.bottom - 8) nav.scrollTop += r.bottom - (n.bottom - 8);
+  };
+  const update = () => {
+    ticking = false;
+    const line = innerHeight / 3;
+    let cur = -1;
+    items.forEach((el, i) => { if (el.getBoundingClientRect().top <= line) cur = i; });
+    // At the foot of the page there is nothing further to skip to, even when the
+    // last item is too short to scroll its top up to the line.
+    const atEnd = scrollY + innerHeight >= document.documentElement.scrollHeight - 2;
+    // 目次: light up the item being read.
+    const reading = items[atEnd ? items.length - 1 : cur] || null;
+    if (reading !== lit) {
+      if (lit) tocLink(lit.id)?.classList.remove('current');
+      lit = reading;
+      const a = lit && tocLink(lit.id);
+      if (a) { a.classList.add('current'); a.setAttribute('aria-current', 'location'); }
+      toc.querySelectorAll('a[aria-current]').forEach(x => { if (x !== a) x.removeAttribute('aria-current'); });
+      keepLitInView();
+    }
+    const target = atEnd ? null : items[cur + 1] || null;
+    if (target === shown) return;
+    shown = target;
+    next.hidden = !target;
+    if (!target) return;
+    const [n, t] = label(target);
+    next.href = '#' + target.id;
+    next.querySelector('.n').textContent = n;
+    next.querySelector('.t').textContent = t;
+    next.setAttribute('aria-label', '次の項目へ：' + (n ? n + ' ' : '') + t);
+  };
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  addEventListener('resize', update);
+  update();
 })();
 </script>
 </body>
