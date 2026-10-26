@@ -86,6 +86,15 @@ p { margin: 0; }
   font-family: var(--font-display); font-size: 1.05rem; color: var(--paper); background: var(--ink);
   border: 2px solid var(--ink); border-radius: 2px; text-decoration: none; box-shadow: 3px 3px 0 var(--coin); }
 .play:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--coin); }
+/* Sharing the game, beside the play button: plain links to each service's posting page. */
+.cta { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; }
+.share { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.share .lab { font-family: var(--font-display); font-size: .82rem; letter-spacing: .1em; color: var(--ink-2); margin-right: 2px; }
+.share a, .share button { font: inherit; font-size: .88rem; padding: .3em .8em; cursor: pointer; color: var(--ink);
+  background: var(--sheet); border: 1.5px solid var(--ink); border-radius: 2px; text-decoration: none; }
+.share a:hover, .share button:hover { background: var(--ink); color: var(--paper); }
+.share a:focus-visible, .share button:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+.share [hidden] { display: none; }
 
 /* ---- two columns ---- */
 .wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 32px; padding-block: 24px 64px; }
@@ -251,7 +260,15 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
   <span class="eyebrow">LAB NOTE ／ 攻略ノート</span>
   <h1><img class="logo px" src="img/logo.png" alt="Welcome to LABolic!" width="636" height="224"></h1>
   <p class="lede">研究室に配属された新人として、試験片を合成・加工・分析し、まだ誰も知らない合金「Discovery」を探すブラウザゲームの攻略ページです。</p>
-  <a class="play" href="https://shuntokita.github.io/welcome-to-LABolic/">▶ ゲームをプレイする</a>
+  <div class="cta">
+    <a class="play" href="https://shuntokita.github.io/welcome-to-LABolic/">▶ ゲームをプレイする</a>
+    <div class="share" role="group" aria-label="ゲームをシェア">
+      <span class="lab">シェア</span>
+      <button type="button" id="share-native" hidden>共有</button>
+      <a id="share-x" target="_blank" rel="noopener">X</a>
+      <button type="button" id="share-copy">URLをコピー</button>
+    </div>
+  </div>
 </header>
 
 <div class="wrap">
@@ -890,6 +907,28 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
   const toc = document.getElementById('toc');
   if (window.matchMedia('(max-width: 959px)').matches) toc.open = false;
   toc.addEventListener('click', e => { if (e.target.closest('a') && window.matchMedia('(max-width: 959px)').matches) toc.open = false; });
+
+  // シェア: the game's address, through X's posting page (none of its scripts
+  // is loaded), the device's share sheet where there is one, or a copy.
+  const SHARE_URL = 'https://shuntokita.github.io/welcome-to-LABolic/';
+  const SHARE_TEXT = '金属材料の研究を体験するブラウザゲーム「Welcome to LABolic!」 #LABolic';
+  document.getElementById('share-x').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(SHARE_TEXT)}&url=${encodeURIComponent(SHARE_URL)}`;
+  const copyUrl = btn => {
+    const label = btn.dataset.label || (btn.dataset.label = btn.textContent);
+    const say = msg => { btn.textContent = msg; clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = label; }, 1600); };
+    if (navigator.clipboard) navigator.clipboard.writeText(SHARE_URL).then(() => say('コピーしました'), () => say('コピーできませんでした'));
+    else say('コピーできませんでした');
+  };
+  const native = document.getElementById('share-native');
+  if (navigator.share) {
+    native.hidden = false;
+    // Having the share sheet is not the same as being allowed it (an embedded
+    // page): only the reader closing it is a no-op, anything else copies instead.
+    native.addEventListener('click', () => navigator.share({ title: 'Welcome to LABolic!', text: SHARE_TEXT, url: SHARE_URL })
+      .catch(e => { if (e && e.name !== 'AbortError') copyUrl(native); }));
+  }
+  const copy = document.getElementById('share-copy');
+  copy.addEventListener('click', () => copyUrl(copy));
 
   // Phones: the contents as a drawer from the left, opened by the ">" tab.
   const narrow = window.matchMedia('(max-width: 959px)');
