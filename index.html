@@ -9,6 +9,12 @@
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="攻略ノート">
+<script>
+  // Offline reading: sw.js (tools/make_sw.py) keeps this page and its images.
+  if ('serviceWorker' in navigator && /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)) {
+    addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
+</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="ブラウザゲーム「Welcome to LABolic!」の攻略情報、データベース、UDMのおすすめビルドをまとめた攻略ノート。">
 <meta property="og:type" content="website">
