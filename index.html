@@ -342,7 +342,7 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
           </ul>
         </div>
         <p class="note"><b>注意</b>iPhone・iPadのSafariでは、しばらくゲームを開かないでいると、サイトのデータが自動で消されることがあります（Safariを使った日数で7日が目安）。ときどきセーブキーをコピーしておくと安心です。</p>
-        <p class="note"><b>注意</b>セーブキーには、講習の記録、UDMのスキルストア、進行中のUDMも含まれます。含まれないのは<b>設定</b>（効果音や表示など）だけです。ただし、<b>v66以前にコピーしたセーブキーには講習の記録などが入っていない</b>ので、引っ越しの前にコピーし直してください。</p>
+        <p class="note"><b>注意</b>セーブキーには、講習の記録、UDMのスキルストア、進行中のUDMも含まれます。含まれないのは<b>設定</b>（プレイヤー名、みため、効果音や表示など）だけです。ただし、<b>v66以前にコピーしたセーブキーには講習の記録などが入っていない</b>ので、引っ越しの前にコピーし直してください。</p>
         <p class="note"><b>注意</b>v72から、<b>submitされていない作業中の試験片はセーブキーに含まれません</b>（装置で合成中のものも含みます）。セーブキーから復元すると、それらの元素代が全てコインとして返却されます。この変更でセーブキーが短くなり、チャットやメモにも貼り付けやすくなりました。v71以前にコピーしたセーブキーもそのまま入力できます。</p>
       </section>
 
@@ -477,7 +477,7 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
         <div class="prose">
           <ul>
             <li>装置のポップアップにある「<b>自分のみ</b>」スイッチで、自分が作った試験片だけを表示できます。Co-Workerの試験片に紛れず、自分の作業に集中できます。</li>
-            <li>同じ組成の試験片を<b>3個一括で作製し、加工条件を3通り（Lv1・2・3）に振り分ける</b>のが鉄板の手順です。加工装置のポップアップで、試験片を選んでからレベルを押すと、その試験片にレベルが割り当てられます。3つに別々のレベルを割り当てて、Go!で一度に処理できます。</li>
+            <li>同じ組成の試験片を<b>3個一括で作製し、加工条件を3通り（Lv1・2・3）に振り分ける</b>のが鉄板の手順です。加工装置のポップアップで、試験片を選んでからレベルを押すと、その試験片にレベルが割り当てられます。3つに別々のレベルを割り当てて、Go!で一度に処理できます。割り当てた直後なら、試験片を選び直さずに別のレベルを押すだけで条件を置き換えられます。</li>
           </ul>
           <details class="fold">
             <summary>伝説レシピのヒント（ネタバレあり）</summary>
@@ -496,7 +496,7 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
     <!-- ================================================================ database -->
     <article class="part" id="db">
       <header><span class="eyebrow">CHAPTER 2</span><h2>各種データベース</h2>
-        <p class="sub">ゲーム本体 v70 のデータから作成しています。</p></header>
+        <p class="sub">ゲーム本体 v74 のデータから作成しています。</p></header>
 
       <section id="equipment">
         <h3><span class="n">2-1</span>装置</h3>
@@ -556,7 +556,7 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
           <tbody>
             <tr><td><b>Casting / Arc Melting / Laser Deposition / Phase-Shift</b><br><span class="sub">合成</span></td><td>装置を分解して掃除し、組み立てる</td><td>装置全体の汚れの除去率</td><td class="num">100%</td><td class="num">90%</td></tr>
             <tr><td><b>Furnace</b><br><span class="sub">加工</span></td><td>石英管を回しながら加熱し、封じ切る</td><td>引いたときのくびれの太さ（ゲージの枠内）</td><td class="num">22%（枠の細い端）</td><td class="num">32%（枠の太い端）</td></tr>
-            <tr><td><b>Rolling Mill</b><br><span class="sub">加工</span></td><td>2.00 mmの板を1.00 mmに圧延する</td><td>仕上がり板厚の誤差</td><td class="num">±0.002 mm以内</td><td class="num">±0.010 mm</td></tr>
+            <tr><td><b>Rolling Mill</b><br><span class="sub">加工</span></td><td>2.00 mmの板を1.00 mmに圧延する。1.00 mmを下回るか、±0.002 mm以内に入るまで何度でも通せる</td><td>仕上がり板厚の誤差（0.99 mm未満は失敗）</td><td class="num">±0.002 mm以内</td><td class="num">±0.010 mm</td></tr>
             <tr><td><b>Magnetizer</b><br><span class="sub">加工</span></td><td>超伝導マグネットを目標磁場まで励磁する</td><td>目標磁場との誤差</td><td class="num">±0.05%以内</td><td class="num">±0.5%</td></tr>
             <tr><td><b>Anti-Grav Torsion</b><br><span class="sub">加工</span></td><td>ステージとスフィアの軸を合わせ、Ωまで加速する</td><td>ねじり開始時の揺れ（Stage・Sphereの大きい方）</td><td class="num">許容線の1/5以下</td><td class="num">許容線ちょうど</td></tr>
             <tr><td><b>Optical / SEM / Q-Accel</b><br><span class="sub">分析</span></td><td>像を合わせてCaptureする（Excellent 3回）</td><td>Excellent 3回のIMG QUALITYの平均</td><td class="num">96.5%（上限）</td><td class="num">90%</td></tr>
@@ -895,7 +895,7 @@ footer { max-width: 1180px; margin: 0 auto; padding-block: 18px 32px; border-top
 </div>
 
 <footer>
-  <p>Welcome to LABolic! 攻略ノート ／ データはゲーム本体 v70 時点のものです。</p>
+  <p>Welcome to LABolic! 攻略ノート ／ データはゲーム本体 v74 時点のものです。</p>
   <p><a href="https://shuntokita.github.io/welcome-to-LABolic/">ゲームをプレイする</a></p>
 </footer>
 
